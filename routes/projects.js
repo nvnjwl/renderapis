@@ -22,7 +22,17 @@ router.use(limiter);
 // CREATE - Post a new project
 router.post('/', async (req, res) => {
   try {
-    const project = new Project(req.body);
+    // Sanitize input data - only allow specific fields
+    const allowedFields = ['name', 'description', 'technologies', 'status', 'startDate', 'endDate', 'repository', 'liveUrl'];
+    const projectData = {};
+    
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        projectData[key] = req.body[key];
+      }
+    });
+
+    const project = new Project(projectData);
     const savedProject = await project.save();
     res.status(201).json({
       success: true,
