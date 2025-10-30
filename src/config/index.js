@@ -21,11 +21,10 @@ const config = {
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/renderapis',
     options: {
-      // Mongoose connection options
+      // Mongoose connection options (updated for newer versions)
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      bufferMaxEntries: 0,
     },
   },
 
