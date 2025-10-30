@@ -1,7 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const Project = require('../models/Project');
+
+// Rate limiting configuration
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply rate limiting to all routes
+router.use(limiter);
 
 // CREATE - Post a new project
 router.post('/', async (req, res) => {
@@ -84,9 +100,19 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Sanitize update data - only allow specific fields
+    const allowedUpdates = ['name', 'description', 'technologies', 'status', 'startDate', 'endDate', 'repository', 'liveUrl'];
+    const updateData = {};
+    
+    Object.keys(req.body).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        updateData[key] = req.body[key];
+      }
+    });
+
     const project = await Project.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updateData,
       { new: true, runValidators: true }
     );
     
