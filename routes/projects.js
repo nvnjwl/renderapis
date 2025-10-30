@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Project = require('../models/Project');
 
 // CREATE - Post a new project
@@ -42,6 +43,14 @@ router.get('/', async (req, res) => {
 // READ - Get a single project by ID
 router.get('/:id', async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid project ID format'
+      });
+    }
+
     const project = await Project.findById(req.params.id);
     
     if (!project) {
@@ -67,6 +76,14 @@ router.get('/:id', async (req, res) => {
 // UPDATE - Update a project by ID
 router.put('/:id', async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid project ID format'
+      });
+    }
+
     const project = await Project.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -97,6 +114,14 @@ router.put('/:id', async (req, res) => {
 // DELETE - Delete a project by ID
 router.delete('/:id', async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid project ID format'
+      });
+    }
+
     const project = await Project.findByIdAndDelete(req.params.id);
     
     if (!project) {
