@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenderAPIs Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-tachometer-alt"></i> RenderAPIs Dashboard</h1>
+            <p>API Testing & Server Monitoring</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Server Health Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-heart-pulse"></i> Server Health</h2>
+                    <button id="refresh-health" class="btn btn-sm">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="health-status" class="status-grid">
+                        <div class="status-item">
+                            <span class="label">Server Status:</span>
+                            <span id="server-status" class="status loading">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Database:</span>
+                            <span id="db-status" class="status loading">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Last Check:</span>
+                            <span id="last-check" class="status">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Version Info Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle"></i> Version Info</h2>
+                    <button id="refresh-version" class="btn btn-sm">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="version-info" class="status-grid">
+                        <div class="status-item">
+                            <span class="label">App Version:</span>
+                            <span id="app-version" class="status loading">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Node.js:</span>
+                            <span id="node-version" class="status loading">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Environment:</span>
+                            <span id="environment" class="status loading">Loading...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Uptime:</span>
+                            <span id="uptime" class="status loading">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Testing Section -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <h2><i class="fas fa-cogs"></i> API Testing</h2>
+                    <div class="btn-group">
+                        <button id="test-all" class="btn">
+                            <i class="fas fa-play"></i> Test All APIs
+                        </button>
+                        <button id="clear-results" class="btn btn-secondary">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="api-test-grid">
+                        <!-- GET All Projects -->
+                        <div class="api-test-item">
+                            <div class="api-header">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/api/projects</span>
+                                <button class="btn btn-sm test-btn" data-method="GET" data-endpoint="/api/projects">
+                                    <i class="fas fa-play"></i> Test
+                                </button>
+                            </div>
+                            <div class="api-result" id="result-get-projects"></div>
+                        </div>
+
+                        <!-- POST Create Project -->
+                        <div class="api-test-item">
+                            <div class="api-header">
+                                <span class="method post">POST</span>
+                                <span class="endpoint">/api/projects</span>
+                                <button class="btn btn-sm test-btn" data-method="POST" data-endpoint="/api/projects">
+                                    <i class="fas fa-play"></i> Test
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="dashboard.togglePayload('post-payload')">
+                                    <i class="fas fa-edit"></i> Edit Payload
+                                </button>
+                            </div>
+                            <div class="payload-section" id="post-payload" style="display: none;">
+                                <label>Request Payload:</label>
+                                <textarea class="payload-input" id="post-projects-payload" rows="8" placeholder="JSON payload...">{
+  "name": "Sample Project",
+  "description": "This is a sample project for testing",
+  "technologies": ["Node.js", "Express", "MongoDB"],
+  "status": "planning",
+  "repository": "https://github.com/example/sample-project",
+  "liveUrl": "https://sample-project.com"
+}</textarea>
+                                <small class="payload-note">Valid status values: planning, in-progress, completed, on-hold</small>
+                            </div>
+                            <div class="api-result" id="result-post-projects"></div>
+                        </div>
+
+                        <!-- GET Single Project -->
+                        <div class="api-test-item">
+                            <div class="api-header">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/api/projects/:id</span>
+                                <input type="text" id="project-id" placeholder="Project ID (auto-filled from POST)" class="input-sm">
+                                <button class="btn btn-sm test-btn" data-method="GET" data-endpoint="/api/projects/" data-needs-id="true">
+                                    <i class="fas fa-play"></i> Test
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="dashboard.populateProjectIds()">
+                                    <i class="fas fa-sync"></i> Auto-fill ID
+                                </button>
+                            </div>
+                            <div class="api-result" id="result-get-project"></div>
+                        </div>
+
+                        <!-- PUT Update Project -->
+                        <div class="api-test-item">
+                            <div class="api-header">
+                                <span class="method put">PUT</span>
+                                <span class="endpoint">/api/projects/:id</span>
+                                <input type="text" id="update-project-id" placeholder="Project ID (auto-filled)" class="input-sm">
+                                <button class="btn btn-sm test-btn" data-method="PUT" data-endpoint="/api/projects/" data-needs-id="true">
+                                    <i class="fas fa-play"></i> Test
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="dashboard.togglePayload('put-payload')">
+                                    <i class="fas fa-edit"></i> Edit Payload
+                                </button>
+                            </div>
+                            <div class="payload-section" id="put-payload" style="display: none;">
+                                <label>Request Payload:</label>
+                                <textarea class="payload-input" id="put-projects-payload" rows="6" placeholder="JSON payload...">{
+  "name": "Updated Project Name",
+  "description": "Updated project description",
+  "technologies": ["Node.js", "Express", "MongoDB", "React"],
+  "status": "in-progress"
+}</textarea>
+                                <small class="payload-note">Valid status values: planning, in-progress, completed, on-hold</small>
+                            </div>
+                            <div class="api-result" id="result-put-project"></div>
+                        </div>
+
+                        <!-- DELETE Project -->
+                        <div class="api-test-item">
+                            <div class="api-header">
+                                <span class="method delete">DELETE</span>
+                                <span class="endpoint">/api/projects/:id</span>
+                                <input type="text" id="delete-project-id" placeholder="Project ID (auto-filled)" class="input-sm">
+                                <button class="btn btn-sm test-btn" data-method="DELETE" data-endpoint="/api/projects/" data-needs-id="true">
+                                    <i class="fas fa-play"></i> Test
+                                </button>
+                                <button class="btn btn-sm btn-secondary" onclick="dashboard.populateProjectIds()">
+                                    <i class="fas fa-sync"></i> Auto-fill ID
+                                </button>
+                            </div>
+                            <div class="api-result" id="result-delete-project"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Section -->
+            <div class="card full-width">
+                <div class="card-header">
+                    <h2><i class="fas fa-file-alt"></i> Activity Log</h2>
+                    <button id="clear-logs" class="btn btn-secondary btn-sm">
+                        <i class="fas fa-trash"></i> Clear Logs
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="activity-log" class="log-container">
+                        <div class="log-entry info">
+                            <span class="timestamp">[System]</span>
+                            <span class="message">Dashboard initialized</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
